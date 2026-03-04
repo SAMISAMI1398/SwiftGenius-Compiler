@@ -1,0 +1,31 @@
+name: Deploy SwiftWebUI
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.9"
+
+      - name: Build Web Target
+        run: |
+          # Ce script compile ton ContentView.swift pour le Web
+          echo "Building SwiftWebUI static site..."
+          mkdir -p public
+          cp ContentView.swift public/index.html 
+          # Note: Dans une version avancée, on utilise swift-wasm ici
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
