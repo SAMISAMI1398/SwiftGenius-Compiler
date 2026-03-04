@@ -19,8 +19,41 @@ jobs:
       - name: Prepare Public Folder
         run: |
           mkdir -p public
-          # On crée une page HTML simple qui affiche ton code
-          echo "<html><body><pre>$(cat ContentView.swift)</pre></body></html>" > public/index.html
+          cat <<EOF > public/index.html
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <script src="https://cdn.tailwindcss.com"></script>
+              <style>
+                  body { background: #000; color: white; font-family: -apple-system, sans-serif; }
+                  .ios-card { background: #1c1c1e; border-radius: 30px; padding: 25px; border: 1px solid #333; height: 100vh; }
+                  .swift-btn { background: #007AFF; border-radius: 12px; padding: 15px; text-align: center; font-weight: 600; width: 100%; margin-top: 20px; }
+              </style>
+          </head>
+          <body class="p-4">
+              <div class="ios-card w-full shadow-2xl flex flex-col items-center justify-center">
+                  <div id="render" class="space-y-6 text-center w-full">
+                      </div>
+              </div>
+              <script>
+                  const code = \`$(cat ContentView.swift)\`;
+                  const output = document.getElementById('render');
+                  
+                  // Extracteur de texte SwiftUI
+                  const textMatch = code.match(/Text\("([^"]+)"\)/);
+                  if(textMatch) {
+                      output.innerHTML += \`<p class="text-3xl font-bold">\${textMatch[1]}</p>\`;
+                  }
+                  
+                  // Extracteur de bouton SwiftUI
+                  if(code.includes('Button')) {
+                      output.innerHTML += \`<div class="swift-btn">Action SwiftUI</div>\`;
+                  }
+              </script>
+          </body>
+          </html>
+          EOF
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
