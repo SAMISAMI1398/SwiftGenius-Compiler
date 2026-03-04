@@ -4,28 +4,29 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "5.9"
-
-      - name: Build Web Target
+      - name: Prepare Public Folder
         run: |
-          # Ce script compile ton ContentView.swift pour le Web
-          echo "Building SwiftWebUI static site..."
           mkdir -p public
-          cp ContentView.swift public/index.html 
-          # Note: Dans une version avancée, on utilise swift-wasm ici
+          # On crée une page HTML simple qui affiche ton code
+          echo "<html><body><pre>$(cat ContentView.swift)</pre></body></html>" > public/index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public'
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+        id: deployment
+        uses: actions/deploy-pages@v4
